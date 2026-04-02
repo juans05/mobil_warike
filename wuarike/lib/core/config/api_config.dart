@@ -1,8 +1,8 @@
 class ApiConfig {
   ApiConfig._();
 
-  static const String baseUrl = 'http://38.242.252.183';
-  static const String apiPath = '/api';
+  static const String baseUrl = 'https://backendwarike-production.up.railway.app';
+  static const String apiPath = '';
   static const String fullBaseUrl = '$baseUrl$apiPath';
 
   // Endpoints
@@ -14,6 +14,7 @@ class ApiConfig {
   static const String missions = '/missions';
   static const String ubigeo = '/ubigeo';
   static const String admin = '/admin';
+  static const String upload = '/upload';
 
   // Timeouts
   static const Duration connectTimeout = Duration(seconds: 15);

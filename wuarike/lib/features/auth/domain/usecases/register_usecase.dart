@@ -1,4 +1,3 @@
-import '../entities/auth_entity.dart';
 import '../repositories/auth_repository.dart';
 
 class RegisterUseCase {
@@ -6,7 +5,7 @@ class RegisterUseCase {
 
   const RegisterUseCase(this._repository);
 
-  Future<AuthEntity> call({
+  Future<void> call({
     required String name,
     required String email,
     required String password,

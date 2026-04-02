@@ -13,6 +13,7 @@ import '../../../gamification/domain/entities/mission_entity.dart';
 import '../../../gamification/presentation/providers/gamification_provider.dart';
 import '../../../gamification/presentation/widgets/badges_grid.dart';
 import '../../../gamification/presentation/widgets/level_progress_bar.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../places/presentation/providers/places_provider.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../providers/profile_provider.dart';
@@ -22,19 +23,11 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sessionAsync = ref.watch(hasSessionProvider);
+    final hasSession = ref.watch(hasSessionProvider);
 
-    return sessionAsync.when(
-      loading: () => const Scaffold(
-          body: Center(
-              child: CircularProgressIndicator(
-                  color: AppColors.primary))),
-      error: (_, __) =>
-          const Scaffold(body: Center(child: Text('Error'))),
-      data: (hasSession) => hasSession
-          ? const _AuthenticatedProfile()
-          : const _GuestProfile(),
-    );
+    return hasSession
+        ? const _AuthenticatedProfile()
+        : const _GuestProfile();
   }
 }
 
@@ -201,8 +194,9 @@ class _AuthenticatedProfile extends ConsumerWidget {
                 await ref
                     .read(profileNotifierProvider.notifier)
                     .logout();
+                ref.invalidate(authProvider);
                 if (!context.mounted) return;
-                context.go(AppRoutes.login);
+                context.go(AppRoutes.map);
               },
             ),
 
@@ -268,11 +262,16 @@ class _BusinessDashboardCard extends StatelessWidget {
           WuarikeButton(
             label: role == 'admin' ? 'Abrir Consola Admin' : 'Gestionar Locales',
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Módulo de gestión próximamente'))
-              );
+              if (role == 'admin') {
+                context.push('/admin/submissions');
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Módulo de gestión próximamente'))
+                );
+              }
             },
           ),
+
         ],
       ),
     );

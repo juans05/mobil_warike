@@ -19,6 +19,7 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -29,7 +30,7 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-
+    setState(() => _isLoading = true);
     try {
       await ref.read(authProvider.notifier).login(
         email: _emailController.text.trim(),
@@ -39,6 +40,24 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
       context.go(AppRoutes.map);
     } catch (e) {
       if (!mounted) return;
+
+      final errorMessage = e.toString().toLowerCase();
+      // Si el error indica que falta verificar el correo
+      if (errorMessage.contains('verify') || 
+          errorMessage.contains('verificar') || 
+          errorMessage.contains('activar')) {
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Debes verificar tu correo antes de ingresar.'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+        
+        context.push(AppRoutes.emailVerification, extra: _emailController.text.trim());
+        return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -53,14 +72,13 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
           margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-    final isLoading = authState.user is AsyncLoading;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -163,8 +181,8 @@ class _EmailLoginScreenState extends ConsumerState<EmailLoginScreen> {
                   const SizedBox(height: 32),
                   WuarikeButton(
                     label: 'Ingresar',
-                    isLoading: isLoading,
-                    onPressed: isLoading ? null : _submit,
+                    isLoading: _isLoading,
+                    onPressed: _isLoading ? null : _submit,
                   ),
                   const SizedBox(height: 24),
                   // Register link

@@ -20,20 +20,27 @@ class ProfileModel extends ProfileEntity {
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) => ProfileModel(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        email: json['email'] as String? ?? '',
-        bio: json['bio'] as String?,
-        avatar: json['avatar'] as String?,
-        role: json['role'] as String? ?? 'user',
-        level: (json['level'] as num?)?.toInt() ?? 1,
-        xp: (json['xp'] as num?)?.toInt() ?? 0,
-        nextLevelXp: (json['nextLevelXp'] as num?)?.toInt() ?? 100,
-        checkinsCount: (json['checkinsCount'] as num?)?.toInt() ?? 0,
-        reviewsCount: (json['reviewsCount'] as num?)?.toInt() ?? 0,
-        photosCount: (json['photosCount'] as num?)?.toInt() ?? 0,
-        videosCount: (json['videosCount'] as num?)?.toInt() ?? 0,
-        followersCount: (json['followersCount'] as num?)?.toInt() ?? 0,
-        followingCount: (json['followingCount'] as num?)?.toInt() ?? 0,
+        id: json['id']?.toString() ?? '',
+        name: json['fullName']?.toString() ?? json['name']?.toString() ?? 'Usuario',
+        email: json['email']?.toString() ?? '',
+        bio: json['bio']?.toString(),
+        avatar: json['avatarUrl']?.toString() ?? json['avatar']?.toString(),
+        role: json['role']?.toString() ?? 'user',
+        level: _toInt(json['level'], 1),
+        xp: _toInt(json['xp'] ?? json['totalPoints'], 0),
+        nextLevelXp: _toInt(json['nextLevelXp'], 100),
+        checkinsCount: _toInt(json['checkinsCount'] ?? json['stats']?['totalCheckins'], 0),
+        reviewsCount: _toInt(json['reviewsCount'], 0),
+        photosCount: _toInt(json['photosCount'], 0),
+        videosCount: _toInt(json['videosCount'], 0),
+        followersCount: _toInt(json['followersCount'], 0),
+        followingCount: _toInt(json['followingCount'], 0),
       );
+
+  static int _toInt(dynamic v, int fallback) {
+    if (v == null) return fallback;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse(v.toString()) ?? fallback;
+  }
 }

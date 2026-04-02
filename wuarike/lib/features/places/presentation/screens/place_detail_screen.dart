@@ -14,6 +14,7 @@ import '../../../../core/widgets/star_rating.dart';
 import '../../../../core/widgets/wuarike_auth_gate.dart';
 import '../../../../core/widgets/wuarike_button.dart';
 import '../../../favorites/presentation/providers/favorites_provider.dart';
+import '../../../profile/presentation/providers/profile_provider.dart';
 import '../../domain/entities/place_detail_entity.dart';
 import '../providers/places_provider.dart';
 
@@ -83,8 +84,8 @@ class _PlaceDetailView extends ConsumerWidget {
             actions: [
               // Edit button for Admin/Business
               ref.watch(profileProvider).maybeWhen(
-                    data: (profile) => (profile?.role == 'admin' ||
-                            profile?.role == 'business')
+                    data: (profile) => (profile.role == 'admin' ||
+                            profile.role == 'business')
                         ? IconButton(
                             icon: Container(
                               padding: const EdgeInsets.all(6),
@@ -304,12 +305,11 @@ class _ActionButtons extends ConsumerWidget {
     final isFavorite = favState.valueOrNull ?? false;
 
     Future<void> guardedAction(Future<void> Function() action) async {
-      final hasSession =
-          await ref.read(hasSessionProvider.future);
-      if (!context.mounted) return;
+      final hasSession = ref.read(hasSessionProvider);
       if (hasSession) {
         await action();
       } else {
+        if (!context.mounted) return;
         await WuarikeAuthGate.show(context);
       }
     }

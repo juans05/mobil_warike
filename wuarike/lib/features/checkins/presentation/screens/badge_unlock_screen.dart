@@ -44,11 +44,10 @@ class _BadgeUnlockScreenState extends State<BadgeUnlockScreen>
       body: SafeArea(
         child: FadeTransition(
           opacity: _fade,
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
                 horizontal: 32, vertical: 40),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
@@ -57,26 +56,28 @@ class _BadgeUnlockScreenState extends State<BadgeUnlockScreen>
                       color: AppColors.white, fontSize: 28),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
                 ScaleTransition(
                   scale: _scale,
-                  child: Container(
-                    width: 140,
-                    height: 140,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                          color: AppColors.white, width: 3),
-                    ),
-                    child: Text(
-                      widget.badge.icon,
-                      style: const TextStyle(fontSize: 64),
+                  child: Center(
+                    child: Container(
+                      width: 140,
+                      height: 140,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: AppColors.white, width: 3),
+                      ),
+                      child: Text(
+                        widget.badge.icon,
+                        style: const TextStyle(fontSize: 64),
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 Text(
                   widget.badge.name,
                   style: AppTextStyles.heading2.copyWith(
@@ -90,7 +91,7 @@ class _BadgeUnlockScreenState extends State<BadgeUnlockScreen>
                       color: AppColors.white.withOpacity(0.85)),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 56),
+                const SizedBox(height: 32),
                 ElevatedButton(
                   onPressed: () => context.go(AppRoutes.map),
                   style: ElevatedButton.styleFrom(

@@ -5,6 +5,7 @@ import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../providers/auth_provider.dart';
+import '../../../map/presentation/providers/map_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -49,17 +50,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 1800));
     if (!mounted) return;
 
-    await ref.read(authProvider.notifier).checkSession();
+    // Restore session and warm up location in background
+    await Future.wait<void>([
+      ref.read(authProvider.notifier).checkSession(),
+      ref.read(locationProvider.notifier).refresh(),
+    ]);
+
     if (!mounted) return;
-
-    final authState = ref.read(authProvider);
-    final user = authState.user.valueOrNull;
-
-    if (user != null) {
-      context.go(AppRoutes.map);
-    } else {
-      context.go(AppRoutes.login);
-    }
+    context.go(AppRoutes.map);
   }
 
   @override

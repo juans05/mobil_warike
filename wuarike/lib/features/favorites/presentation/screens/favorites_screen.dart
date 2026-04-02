@@ -32,7 +32,7 @@ class FavoritesScreen extends ConsumerWidget {
           // ── Saved places ─────────────────────────────────────────────
           _SectionHeader(
             title: 'Lugares Guardados',
-            count: favAsync.value?.length ?? 0,
+            count: favAsync.valueOrNull?.length ?? 0,
           ),
           const SizedBox(height: 12),
           favAsync.when(
@@ -73,7 +73,7 @@ class FavoritesScreen extends ConsumerWidget {
           // ── Check-ins ────────────────────────────────────────────────
           _SectionHeader(
             title: 'Check-ins Realizados',
-            count: checkInsAsync.value?.length ?? 0,
+            count: checkInsAsync.valueOrNull?.length ?? 0,
           ),
           const SizedBox(height: 12),
           checkInsAsync.when(

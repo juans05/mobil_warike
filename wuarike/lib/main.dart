@@ -10,15 +10,17 @@ Future<void> main() async {
   runApp(const ProviderScope(child: WuarikeApp()));
 }
 
-class WuarikeApp extends StatelessWidget {
+class WuarikeApp extends ConsumerWidget {
   const WuarikeApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    
     return MaterialApp.router(
       title: 'Wuarike',
       theme: AppTheme.light,
-      routerConfig: appRouter,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
     );
   }

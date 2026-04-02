@@ -9,7 +9,7 @@ class BadgesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(userStatsProvider);
+    final badgesAsync = ref.watch(badgesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -18,9 +18,8 @@ class BadgesScreen extends ConsumerWidget {
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textDark),
       ),
-      body: statsAsync.when(
-        data: (stats) {
-          final badges = stats.badges;
+      body: badgesAsync.when(
+        data: (badges) {
           if (badges.isEmpty) {
             return Center(
               child: Column(

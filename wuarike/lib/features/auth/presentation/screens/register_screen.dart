@@ -23,6 +23,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _confirmCtrl = TextEditingController();
   bool _obscurePass = true;
   bool _obscureConfirm = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -35,6 +36,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
     try {
       await ref.read(authProvider.notifier).register(
             name: _nameCtrl.text.trim(),
@@ -42,7 +44,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             password: _passCtrl.text,
           );
       if (!mounted) return;
-      context.pushReplacement(AppRoutes.emailVerification);
+      context.pushReplacement(AppRoutes.emailVerification, extra: _emailCtrl.text.trim());
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -50,14 +52,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         backgroundColor: AppColors.secondary,
         behavior: SnackBarBehavior.floating,
       ));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLoading =
-        ref.watch(authProvider).user is AsyncLoading;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -175,8 +176,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: 32),
                   WuarikeButton(
                     label: 'Registrarme',
-                    isLoading: isLoading,
-                    onPressed: isLoading ? null : _submit,
+                    isLoading: _isLoading,
+                    onPressed: _isLoading ? null : _submit,
                   ),
                   const SizedBox(height: 24),
                   Center(

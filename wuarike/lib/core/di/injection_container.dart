@@ -10,6 +10,22 @@ import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/domain/usecases/social_login_usecase.dart';
+import '../../features/auth/domain/usecases/verify_email_usecase.dart';
+import '../../features/auth/domain/usecases/resend_code_usecase.dart';
+import '../../features/auth/domain/usecases/forgot_password_usecase.dart';
+import '../../features/auth/domain/usecases/reset_password_usecase.dart';
+import '../services/location_service.dart';
+import '../../features/places/domain/repositories/place_submission_repository.dart';
+import '../../features/places/data/repositories/place_submission_repository_impl.dart';
+import '../../features/places/domain/usecases/create_place_submission_usecase.dart';
+import '../../features/places/data/datasources/places_remote_datasource.dart';
+
+import '../../features/admin/data/datasources/admin_remote_datasource.dart';
+import '../../features/admin/data/repositories/admin_repository_impl.dart';
+import '../../features/admin/domain/repositories/admin_repository.dart';
+import '../../features/admin/domain/usecases/get_pending_submissions_usecase.dart';
+import '../../features/admin/domain/usecases/approve_submission_usecase.dart';
+import '../../features/admin/domain/usecases/reject_submission_usecase.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -21,6 +37,35 @@ Future<void> initDependencies() async {
   // ─── Core ────────────────────────────────────────────────────────────────
   sl.registerLazySingleton<TokenStorage>(() => TokenStorage());
   sl.registerLazySingleton<DioClient>(() => DioClient(sl<TokenStorage>()));
+  sl.registerLazySingleton<LocationService>(() => LocationService());
+
+  // ─── Places Extra ────────────────────────────────────────────────────────
+  sl.registerLazySingleton<PlacesRemoteDataSource>(
+    () => PlacesRemoteDataSourceImpl(sl<DioClient>()),
+  );
+  sl.registerLazySingleton<PlaceSubmissionRepository>(
+    () => PlaceSubmissionRepositoryImpl(sl<PlacesRemoteDataSource>()),
+  );
+  sl.registerLazySingleton<CreatePlaceSubmissionUseCase>(
+    () => CreatePlaceSubmissionUseCase(sl<PlaceSubmissionRepository>()),
+  );
+
+  // ─── Admin ────────────────────────────────────────────────────────────────
+  sl.registerLazySingleton<AdminRemoteDataSource>(
+    () => AdminRemoteDataSourceImpl(sl<DioClient>()),
+  );
+  sl.registerLazySingleton<AdminRepository>(
+    () => AdminRepositoryImpl(sl<AdminRemoteDataSource>()),
+  );
+  sl.registerLazySingleton<GetPendingSubmissionsUseCase>(
+    () => GetPendingSubmissionsUseCase(sl<AdminRepository>()),
+  );
+  sl.registerLazySingleton<ApproveSubmissionUseCase>(
+    () => ApproveSubmissionUseCase(sl<AdminRepository>()),
+  );
+  sl.registerLazySingleton<RejectSubmissionUseCase>(
+    () => RejectSubmissionUseCase(sl<AdminRepository>()),
+  );
 
   // ─── Auth ─────────────────────────────────────────────────────────────────
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -46,5 +91,17 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton<SocialLoginUseCase>(
     () => SocialLoginUseCase(sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton<VerifyEmailUseCase>(
+    () => VerifyEmailUseCase(sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton<ResendCodeUseCase>(
+    () => ResendCodeUseCase(sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton<ForgotPasswordUseCase>(
+    () => ForgotPasswordUseCase(sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton<ResetPasswordUseCase>(
+    () => ResetPasswordUseCase(sl<AuthRepository>()),
   );
 }

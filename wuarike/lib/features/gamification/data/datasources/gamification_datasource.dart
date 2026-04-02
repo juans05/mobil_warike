@@ -51,7 +51,8 @@ class GamificationDataSourceImpl implements GamificationDataSource {
   Future<List<MissionModel>> getMissions() async {
     try {
       final res = await _client.dio.get('/missions');
-      final list = (res.data['data'] ?? res.data) as List;
+      final raw = res.data;
+      final list = (raw is List ? raw : (raw['data'] ?? raw['missions'] ?? raw)) as List;
       return list
           .map((e) => MissionModel.fromJson(e as Map<String, dynamic>))
           .toList();

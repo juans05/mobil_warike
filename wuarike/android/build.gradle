@@ -5,12 +5,24 @@ allprojects {
     }
 }
 
+rootProject.ext {
+    compileSdkVersion = 35
+    minSdkVersion = 21
+    targetSdkVersion = 35
+}
+
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(":app")
+    // Compatibility shim for Flutter plugins using flutter.compileSdkVersion (e.g. geolocator_android)
+    // Skip :app since it gets the real FlutterExtension from dev.flutter.flutter-gradle-plugin.
+    if (project.name != "app") {
+        project.ext.set("flutter", [
+            compileSdkVersion: 35,
+            minSdkVersion: 21,
+            targetSdkVersion: 35
+        ])
+    }
 }
 
 tasks.register("clean", Delete) {

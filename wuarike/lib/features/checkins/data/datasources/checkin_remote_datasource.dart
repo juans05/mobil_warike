@@ -56,7 +56,7 @@ class CheckInRemoteDataSourceImpl implements CheckInRemoteDataSource {
   @override
   Future<List<CheckInModel>> getMyCheckIns() async {
     try {
-      final res = await _client.dio.get('/checkins/my');
+      final res = await _client.dio.get('/users/me/checkins');
       final list = (res.data['data'] ?? res.data) as List;
       return list
           .map((e) => CheckInModel.fromJson(e as Map<String, dynamic>))

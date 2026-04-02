@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/network/token_storage.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/datasources/places_remote_datasource.dart';
 import '../../data/repositories/places_repository_impl.dart';
 import '../../domain/entities/filter_params.dart';
@@ -9,6 +9,8 @@ import '../../domain/entities/place_entity.dart';
 import '../../domain/usecases/get_nearby_places_usecase.dart';
 import '../../domain/usecases/get_place_detail_usecase.dart';
 import '../../domain/usecases/search_places_usecase.dart';
+import '../../domain/usecases/create_place_submission_usecase.dart';
+import '../../domain/entities/place_submission_entity.dart';
 
 // ─── Infrastructure providers ────────────────────────────────────────────────
 
@@ -32,11 +34,15 @@ final _getPlaceDetailUseCaseProvider = Provider((ref) {
   return GetPlaceDetailUseCase(ref.watch(_placesRepositoryProvider));
 });
 
+final _createPlaceSubmissionUseCaseProvider = Provider((ref) {
+  return sl<CreatePlaceSubmissionUseCase>();
+});
+
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 
-final hasSessionProvider = FutureProvider<bool>((ref) async {
-  final storage = sl<TokenStorage>();
-  return storage.hasSession();
+final hasSessionProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authProvider);
+  return authState.user.valueOrNull != null;
 });
 
 // ─── Nearby places ───────────────────────────────────────────────────────────
@@ -116,4 +122,27 @@ final similarPlacesProvider =
     FutureProvider.family<List<PlaceEntity>, String>((ref, id) async {
   final repository = ref.watch(_placesRepositoryProvider);
   return repository.getSimilarPlaces(id);
+});
+
+// ─── Submissions ─────────────────────────────────────────────────────────────
+
+class PlaceSubmissionNotifier extends StateNotifier<AsyncValue<void>> {
+  final CreatePlaceSubmissionUseCase _useCase;
+
+  PlaceSubmissionNotifier(this._useCase) : super(const AsyncValue.data(null));
+
+  Future<void> submit(PlaceSubmissionEntity submission) async {
+    state = const AsyncValue.loading();
+    try {
+      await _useCase(submission);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+}
+
+final placeSubmissionProvider =
+    StateNotifierProvider<PlaceSubmissionNotifier, AsyncValue<void>>((ref) {
+  return PlaceSubmissionNotifier(ref.watch(_createPlaceSubmissionUseCaseProvider));
 });

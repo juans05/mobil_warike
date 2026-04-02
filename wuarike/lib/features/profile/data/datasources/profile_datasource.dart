@@ -18,7 +18,7 @@ class ProfileDataSourceImpl implements ProfileDataSource {
   Future<ProfileModel> getProfile() async {
     final box = Hive.box('cache');
     try {
-      final res = await _client.dio.get('/users/profile');
+      final res = await _client.dio.get('/users/me/profile');
       final data = res.data as Map<String, dynamic>;
       await box.put('profile', jsonEncode(data));
       return ProfileModel.fromJson(data);
@@ -43,8 +43,8 @@ class ProfileDataSourceImpl implements ProfileDataSource {
   Future<ProfileModel> updateProfile({String? name, String? bio}) async {
     final box = Hive.box('cache');
     try {
-      final res = await _client.dio.put('/users/profile', data: {
-        if (name != null) 'name': name,
+      final res = await _client.dio.patch('/users/me/profile', data: {
+        if (name != null) 'fullName': name,
         if (bio != null) 'bio': bio,
       });
       final data = res.data as Map<String, dynamic>;

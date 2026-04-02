@@ -35,6 +35,7 @@ class WuarikeAuthGate extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
+          const SizedBox(height: 8),
           // Close button
           Align(
             alignment: Alignment.topRight,
@@ -43,19 +44,7 @@ class WuarikeAuthGate extends StatelessWidget {
               icon: const Icon(Icons.close),
             ),
           ),
-          // Icon
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Text('🍴', style: TextStyle(fontSize: 32)),
-            ),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Text(
             '¡Únete a la Caza de Wuarikes!',
             style: AppTextStyles.heading2,
@@ -67,67 +56,123 @@ class WuarikeAuthGate extends StatelessWidget {
             style: AppTextStyles.body.copyWith(color: AppColors.grey),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           // Google
-          WuarikeButton(
+          _SocialButton(
             label: 'Continuar con Google',
-            variant: WuarikeButtonVariant.outline,
-            icon: Image.network(
-              'https://www.google.com/favicon.ico',
-              width: 20,
-              height: 20,
-              errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.g_mobiledata, size: 20),
-            ),
+            icon: Icons.g_mobiledata,
+            color: Colors.white,
+            textColor: Colors.black87,
+            hasBorder: true,
             onPressed: () {
               Navigator.of(context).pop();
-              // TODO: trigger Google OAuth
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           // Facebook
-          WuarikeButton(
+          _SocialButton(
             label: 'Continuar con Facebook',
-            variant: WuarikeButtonVariant.primary,
-            icon: const Icon(Icons.facebook, color: AppColors.white, size: 20),
+            icon: Icons.facebook,
+            color: const Color(0xFF1877F2),
+            textColor: Colors.white,
             onPressed: () {
               Navigator.of(context).pop();
-              // TODO: trigger Facebook OAuth
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           // Instagram
-          WuarikeButton(
+          _SocialButton(
             label: 'Continuar con Instagram',
-            variant: WuarikeButtonVariant.secondary,
-            icon: const Icon(Icons.camera_alt_outlined,
-                color: AppColors.white, size: 20),
+            icon: Icons.camera_alt,
+            color: const Color(0xFFE1306C),
+            textColor: Colors.white,
             onPressed: () {
               Navigator.of(context).pop();
-              // TODO: trigger Instagram OAuth
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Row(
             children: [
               const Expanded(child: Divider()),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text('O con email', style: AppTextStyles.bodySmall),
               ),
               const Expanded(child: Divider()),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           WuarikeButton(
             label: 'Usar correo electrónico',
-            variant: WuarikeButtonVariant.secondary,
             onPressed: () {
               Navigator.of(context).pop();
               context.push(AppRoutes.emailLogin);
             },
           ),
+          const SizedBox(height: 20),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Quizás más tarde',
+              style: AppTextStyles.body.copyWith(
+                color: AppColors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _SocialButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final Color textColor;
+  final bool hasBorder;
+  final VoidCallback onPressed;
+
+  const _SocialButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.textColor,
+    this.hasBorder = false,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: color,
+          side: hasBorder ? BorderSide(color: Colors.grey.shade300) : BorderSide.none,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+        ),
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(icon, color: textColor, size: 24),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                label,
+                style: AppTextStyles.button.copyWith(
+                  color: textColor,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

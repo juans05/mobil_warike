@@ -4,6 +4,8 @@ import '../../../../core/network/dio_client.dart';
 import '../../../../core/config/api_config.dart';
 import '../models/place_detail_model.dart';
 import '../models/place_model.dart';
+import '../models/place_submission_model.dart';
+
 
 abstract class PlacesRemoteDataSource {
   Future<List<PlaceModel>> getNearbyPlaces({
@@ -26,6 +28,10 @@ abstract class PlacesRemoteDataSource {
   Future<List<PlaceModel>> getSimilarPlaces(String id);
 
   Future<PlaceModel> createPlace(Map<String, dynamic> data);
+
+  Future<PlaceSubmissionModel> submitPlace(Map<String, dynamic> data);
+
+  Future<String> uploadPlaceImage(String filePath);
 }
 
 class PlacesRemoteDataSourceImpl implements PlacesRemoteDataSource {
@@ -44,8 +50,8 @@ class PlacesRemoteDataSourceImpl implements PlacesRemoteDataSource {
   }) async {
     try {
       final queryParams = <String, dynamic>{
-        'lat': lat,
-        'lng': lng,
+        'latitude': lat,
+        'longitude': lng,
         'page': page,
         'limit': limit,
       };
@@ -74,12 +80,12 @@ class PlacesRemoteDataSourceImpl implements PlacesRemoteDataSource {
     double? lng,
   }) async {
     try {
-      final queryParams = <String, dynamic>{'q': query};
-      if (lat != null) queryParams['lat'] = lat;
-      if (lng != null) queryParams['lng'] = lng;
+      final queryParams = <String, dynamic>{'search': query};
+      if (lat != null) queryParams['latitude'] = lat;
+      if (lng != null) queryParams['longitude'] = lng;
 
       final response = await _dioClient.dio.get(
-        '${ApiConfig.places}/search',
+        ApiConfig.places,
         queryParameters: queryParams,
       );
 
@@ -127,6 +133,39 @@ class PlacesRemoteDataSourceImpl implements PlacesRemoteDataSource {
       final response = await _dioClient.dio.post(ApiConfig.places, data: data);
       final json = response.data as Map<String, dynamic>;
       return PlaceModel.fromJson(json);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  @override
+  Future<PlaceSubmissionModel> submitPlace(Map<String, dynamic> data) async {
+    try {
+      final response =
+          await _dioClient.dio.post('${ApiConfig.places}/submissions', data: data);
+      final json = response.data as Map<String, dynamic>;
+      return PlaceSubmissionModel.fromJson(json);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  @override
+  Future<String> uploadPlaceImage(String filePath) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+        ),
+      });
+
+      final response = await _dioClient.dio.post(
+        ApiConfig.upload,
+        data: formData,
+      );
+
+      return response.data['url'] as String;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }

@@ -46,12 +46,11 @@ class ReviewListScreen extends ConsumerWidget {
             style:
                 AppTextStyles.label.copyWith(color: AppColors.white)),
         onPressed: () async {
-          final has =
-              await ref.read(hasSessionProvider.future);
-          if (!context.mounted) return;
+          final has = ref.read(hasSessionProvider);
           if (has) {
             context.push('/places/$placeId/reviews/write');
           } else {
+            if (!context.mounted) return;
             await WuarikeAuthGate.show(context);
           }
         },

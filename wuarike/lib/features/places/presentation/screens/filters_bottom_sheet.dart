@@ -5,7 +5,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/constants.dart';
 import '../../../../core/widgets/wuarike_button.dart';
 import '../../domain/entities/filter_params.dart';
-import '../../ubigeo/presentation/providers/ubigeo_provider.dart';
+import '../../../ubigeo/presentation/providers/ubigeo_provider.dart';
 
 // Local state providers for the sheet
 final _sortProvider = StateProvider<String?>((ref) => null);
@@ -129,12 +129,17 @@ class _FiltersBottomSheetState extends ConsumerState<FiltersBottomSheet> {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Text('Filtros', style: AppTextStyles.heading2),
-                        const Spacer(),
+                        Expanded(
+                          child: Text(
+                            'Filtros',
+                            style: AppTextStyles.heading2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                         TextButton(
                           onPressed: _resetAll,
                           child: Text(
-                            'Limpiar todo',
+                            'Limpiar',
                             style: AppTextStyles.body.copyWith(
                               color: AppColors.primary,
                             ),
@@ -315,8 +320,9 @@ class _FiltersBottomSheetState extends ConsumerState<FiltersBottomSheet> {
                     // ── Valoración mínima ─────────────────────────────────
                     _sectionTitle('Valoración mínima'),
                     const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [1.0, 2.0, 3.0, 4.0, 4.5].map((val) {
                         final selected = minRating == val;
                         return GestureDetector(
@@ -382,48 +388,51 @@ class _FiltersBottomSheetState extends ConsumerState<FiltersBottomSheet> {
                     // ── Rango de precio ───────────────────────────────────
                     _sectionTitle('Rango de precio'),
                     const SizedBox(height: 10),
-                    Row(
-                      children: AppConstants.priceRanges.map((pr) {
-                        final selected = priceRange == pr;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: GestureDetector(
-                            onTap: () {
-                              ref.read(_priceRangeProvider.notifier).state =
-                                  selected ? null : pr;
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: selected
-                                    ? AppColors.primary.withOpacity(0.1)
-                                    : AppColors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: selected
-                                      ? AppColors.primary
-                                      : AppColors.greyLight,
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: AppConstants.priceRanges.map((pr) {
+                          final selected = priceRange == pr;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: GestureDetector(
+                              onTap: () {
+                                ref.read(_priceRangeProvider.notifier).state =
+                                    selected ? null : pr;
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
                                 ),
-                              ),
-                              child: Text(
-                                pr,
-                                style: AppTextStyles.body.copyWith(
+                                decoration: BoxDecoration(
                                   color: selected
-                                      ? AppColors.primary
-                                      : AppColors.textDark,
-                                  fontWeight: selected
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
+                                      ? AppColors.primary.withOpacity(0.1)
+                                      : AppColors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: selected
+                                        ? AppColors.primary
+                                        : AppColors.greyLight,
+                                  ),
+                                ),
+                                child: Text(
+                                  pr,
+                                  style: AppTextStyles.body.copyWith(
+                                    color: selected
+                                        ? AppColors.primary
+                                        : AppColors.textDark,
+                                    fontWeight: selected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      }).toList(),
+                          );
+                        }).toList(),
+                      ),
                     ),
                     const SizedBox(height: 20),
 

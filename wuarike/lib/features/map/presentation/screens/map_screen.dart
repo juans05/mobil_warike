@@ -50,6 +50,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final locationAsync = ref.watch(locationProvider);
     final filters = ref.watch(mapFiltersProvider);
 
+    // ── Listen for location changes to auto-center once ──────────────────────
+    ref.listen<AsyncValue<LatLng>>(locationProvider, (previous, next) {
+      if (next is AsyncData<LatLng> &&
+          (previous == null || previous is! AsyncData)) {
+        // Ensure the map is rendered before moving the controller
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          try {
+            _mapController.move(next.value, 15.0);
+          } catch (e) {
+            debugPrint('Error moving map: $e');
+          }
+        });
+      }
+    });
+
     return Scaffold(
       extendBody: true,
       body: locationAsync.when(
@@ -182,12 +197,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       bottomNavigationBar: WuarikeBottomBar(
         currentIndex: 0,
         onFabPressed: () async {
-          final hasSession =
-              await ref.read(hasSessionProvider.future);
-          if (!mounted) return;
+          final hasSession = ref.read(hasSessionProvider);
           if (hasSession) {
             context.push(AppRoutes.addPlace);
           } else {
+            if (!mounted) return;
             await WuarikeAuthGate.show(context);
           }
         },

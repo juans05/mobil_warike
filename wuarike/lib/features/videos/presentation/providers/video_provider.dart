@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:video_compress/video_compress.dart';
 
 import '../../../../core/di/injection_container.dart';
+
 import '../../data/datasources/video_remote_datasource.dart';
 import '../../data/repositories/video_repository_impl.dart';
 import '../../domain/entities/video_entity.dart';
@@ -67,7 +69,9 @@ class VideoUploadState {
       );
 }
 
+
 class VideoUploadNotifier extends StateNotifier<VideoUploadState> {
+
   final UploadVideoUseCase _uploadVideoUseCase;
   final Ref _ref;
 
@@ -80,9 +84,23 @@ class VideoUploadNotifier extends StateNotifier<VideoUploadState> {
   }) async {
     state = const VideoUploadState(status: UploadStatus.compressing);
     try {
+      // Compress video
+      final MediaInfo? mediaInfo = await VideoCompress.compressVideo(
+        filePath,
+        quality: VideoQuality.MediumQuality,
+        deleteOrigin: false,
+        includeAudio: true,
+      );
+
+      if (mediaInfo == null || mediaInfo.path == null) {
+        throw Exception('Falló la compresión del video');
+      }
+
+      state = state.copyWith(status: UploadStatus.uploading, progress: 0.0);
+
       final video = await _uploadVideoUseCase(
         placeId: placeId,
-        filePath: filePath,
+        filePath: mediaInfo.path!,
         onProgress: (sent, total) {
           if (total > 0) {
             state = state.copyWith(
@@ -106,11 +124,16 @@ class VideoUploadNotifier extends StateNotifier<VideoUploadState> {
         status: UploadStatus.failure,
         errorMessage: e.toString(),
       );
+    } finally {
+      // Cleanup: delete temp compressed file if needed
+      // Actually VideoCompress handles temp files, but we could call deleteAll
+      // VideoCompress.deleteAllCache();
     }
   }
 
   void reset() => state = const VideoUploadState();
 }
+
 
 final videoUploadProvider =
     StateNotifierProvider<VideoUploadNotifier, VideoUploadState>(

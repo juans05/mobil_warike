@@ -1,6 +1,6 @@
-import '../domain/entities/district_entity.dart';
-import '../domain/repositories/ubigeo_repository.dart';
-import '../data/datasources/ubigeo_remote_datasource.dart';
+import '../../domain/entities/district_entity.dart';
+import '../../domain/repositories/ubigeo_repository.dart';
+import '../datasources/ubigeo_remote_datasource.dart';
 
 class UbigeoRepositoryImpl implements UbigeoRepository {
   final UbigeoRemoteDataSource _remoteDataSource;

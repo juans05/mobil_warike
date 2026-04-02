@@ -17,7 +17,7 @@ class FavoritesRemoteDataSourceImpl implements FavoritesRemoteDataSource {
   @override
   Future<List<FavoriteModel>> getFavorites() async {
     try {
-      final res = await _client.dio.get('/favorites');
+      final res = await _client.dio.get('/users/me/favorites');
       final list = (res.data['data'] ?? res.data) as List;
       return list
           .map((e) => FavoriteModel.fromJson(e as Map<String, dynamic>))
@@ -30,7 +30,7 @@ class FavoritesRemoteDataSourceImpl implements FavoritesRemoteDataSource {
   @override
   Future<void> addFavorite(String placeId) async {
     try {
-      await _client.dio.post('/favorites', data: {'placeId': placeId});
+      await _client.dio.post('/places/$placeId/favorite');
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -39,7 +39,7 @@ class FavoritesRemoteDataSourceImpl implements FavoritesRemoteDataSource {
   @override
   Future<void> removeFavorite(String placeId) async {
     try {
-      await _client.dio.delete('/favorites/$placeId');
+      await _client.dio.delete('/places/$placeId/favorite');
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -48,7 +48,7 @@ class FavoritesRemoteDataSourceImpl implements FavoritesRemoteDataSource {
   @override
   Future<bool> isFavorite(String placeId) async {
     try {
-      final res = await _client.dio.get('/favorites/check/$placeId');
+      final res = await _client.dio.get('/places/$placeId/favorite');
       return res.data['isSaved'] as bool? ?? false;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);

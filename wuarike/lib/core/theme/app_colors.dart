@@ -12,6 +12,7 @@ class AppColors {
   static const Color white = Color(0xFFFFFFFF);
   static const Color grey = Color(0xFF9E9E9E);
   static const Color greyLight = Color(0xFFEEEEEE);
+  static const Color error = Color(0xFFE53935);
 
   // Rareza
   static const Color rarityCommon = Color(0xFF9E9E9E);

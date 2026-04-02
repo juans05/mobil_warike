@@ -10,6 +10,8 @@ import '../../../../core/widgets/widgets.dart';
 import '../../domain/entities/video_entity.dart';
 import '../providers/video_provider.dart';
 
+final currentVideoIndexProvider = StateProvider<int>((ref) => 0);
+
 class VideoFeedScreen extends ConsumerWidget {
   final String placeId;
   final String placeName;
@@ -99,9 +101,12 @@ class VideoFeedScreen extends ConsumerWidget {
           return PageView.builder(
             scrollDirection: Axis.vertical,
             itemCount: result.videos.length,
+            onPageChanged: (index) =>
+                ref.read(currentVideoIndexProvider.notifier).state = index,
             itemBuilder: (context, index) => _VideoPage(
               video: result.videos[index],
               placeName: placeName,
+              index: index,
             ),
           );
         },
@@ -110,36 +115,36 @@ class VideoFeedScreen extends ConsumerWidget {
   }
 
   Future<bool> _checkSession(BuildContext context) async {
-    // Show auth gate if not authenticated; returns true if user is/was already logged in.
-    // We use a simple token check here to avoid circular dependencies.
-    // The actual session check is delegated to WuarikeAuthGate.
     bool shouldProceed = true;
-    await WuarikeAuthGate.show(context).then((_) {
-      // After dismissal, proceed — the user either logged in or dismissed.
-      // Actual guard on the upload screen handles the rest.
-    });
+    await WuarikeAuthGate.show(context).then((_) {});
     return shouldProceed;
   }
 }
 
 // ── Individual video page ────────────────────────────────────────────────────
 
-class _VideoPage extends StatefulWidget {
+class _VideoPage extends ConsumerStatefulWidget {
   final VideoEntity video;
   final String placeName;
+  final int index;
 
-  const _VideoPage({required this.video, required this.placeName});
+  const _VideoPage({
+    required this.video,
+    required this.placeName,
+    required this.index,
+  });
 
   @override
-  State<_VideoPage> createState() => _VideoPageState();
+  ConsumerState<_VideoPage> createState() => _VideoPageState();
 }
 
-class _VideoPageState extends State<_VideoPage>
+class _VideoPageState extends ConsumerState<_VideoPage>
     with AutomaticKeepAliveClientMixin {
   late VideoPlayerController _vpController;
   ChewieController? _chewieController;
   bool _initialized = false;
   String? _error;
+
 
   @override
   bool get wantKeepAlive => true;
@@ -158,7 +163,7 @@ class _VideoPageState extends State<_VideoPage>
       await _vpController.initialize();
       _chewieController = ChewieController(
         videoPlayerController: _vpController,
-        autoPlay: true,
+        autoPlay: ref.read(currentVideoIndexProvider) == widget.index,
         looping: true,
         showControls: false,
         aspectRatio: _vpController.value.aspectRatio,
@@ -191,6 +196,17 @@ class _VideoPageState extends State<_VideoPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
+    // Play/Pause based on current index
+    ref.listen(currentVideoIndexProvider, (prev, next) {
+      if (!_initialized) return;
+      if (next == widget.index) {
+        _vpController.play();
+      } else {
+        _vpController.pause();
+      }
+    });
+
     return GestureDetector(
       onTap: () {
         if (_initialized) {

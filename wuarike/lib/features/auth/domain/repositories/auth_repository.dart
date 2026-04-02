@@ -7,7 +7,7 @@ abstract interface class AuthRepository {
     required String password,
   });
 
-  Future<AuthEntity> register({
+  Future<void> register({
     required String name,
     required String email,
     required String password,
@@ -18,6 +18,18 @@ abstract interface class AuthRepository {
   Future<UserEntity> getCurrentUser();
 
   Future<AuthEntity> refreshToken(String refreshToken);
+
+  Future<void> verifyEmail({required String email, required String code});
+
+  Future<void> resendCode({required String email});
+
+  Future<void> forgotPassword({required String email});
+
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+  });
 
   Future<AuthEntity> socialLogin({
     required String provider,
