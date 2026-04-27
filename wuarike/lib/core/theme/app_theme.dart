@@ -11,11 +11,9 @@ class AppTheme {
           seedColor: AppColors.primary,
           primary: AppColors.primary,
           secondary: AppColors.secondary,
-          background: AppColors.background,
-          surface: AppColors.white,
+          surface: AppColors.background,
           onPrimary: AppColors.white,
           onSecondary: AppColors.white,
-          onBackground: AppColors.textDark,
           onSurface: AppColors.textDark,
         ),
         scaffoldBackgroundColor: AppColors.background,
@@ -79,7 +77,7 @@ class AppTheme {
             color: AppColors.grey,
           ),
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: AppColors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
