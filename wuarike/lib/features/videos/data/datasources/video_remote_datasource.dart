@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:video_compress/video_compress.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/network/dio_client.dart';
@@ -56,18 +55,10 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
     void Function(int sent, int total)? onProgress,
   }) async {
     try {
-      // Compress before upload
-      final MediaInfo? info = await VideoCompress.compressVideo(
-        filePath,
-        quality: VideoQuality.MediumQuality,
-        deleteOrigin: false,
-        includeAudio: true,
-      );
-
-      final uploadPath = info?.path ?? filePath;
+      // filePath already points to the compressed file — no second compression here
       final file = await MultipartFile.fromFile(
-        uploadPath,
-        filename: File(uploadPath).uri.pathSegments.last,
+        filePath,
+        filename: File(filePath).uri.pathSegments.last,
       );
 
       final formData = FormData.fromMap({'video': file});
@@ -77,6 +68,8 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
         data: formData,
         options: Options(
           headers: {'Content-Type': 'multipart/form-data'},
+          // Extra time for the server to process the video after receiving it
+          receiveTimeout: const Duration(seconds: 120),
         ),
         onSendProgress: onProgress,
       );
@@ -84,8 +77,6 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
       return VideoModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
-    } finally {
-      await VideoCompress.cancelCompression();
     }
   }
 }

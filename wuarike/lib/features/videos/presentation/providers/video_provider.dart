@@ -82,9 +82,18 @@ class VideoUploadNotifier extends StateNotifier<VideoUploadState> {
     required String placeId,
     required String filePath,
   }) async {
-    state = const VideoUploadState(status: UploadStatus.compressing);
+    state = const VideoUploadState(status: UploadStatus.compressing, progress: 0.0);
+
+    // Track real compression progress via VideoCompress observable
+    final Subscription compressionSub = VideoCompress
+        .compressProgress$
+        .subscribe((progress) {
+      if (state.status == UploadStatus.compressing) {
+        state = state.copyWith(progress: progress / 100.0);
+      }
+    });
+
     try {
-      // Compress video
       final MediaInfo? mediaInfo = await VideoCompress.compressVideo(
         filePath,
         quality: VideoQuality.MediumQuality,
@@ -117,17 +126,15 @@ class VideoUploadNotifier extends StateNotifier<VideoUploadState> {
         uploadedVideo: video,
       );
 
-      // Invalidate list so it refreshes
       _ref.invalidate(placeVideosProvider(placeId));
     } catch (e) {
+      await VideoCompress.cancelCompression();
       state = VideoUploadState(
         status: UploadStatus.failure,
         errorMessage: e.toString(),
       );
     } finally {
-      // Cleanup: delete temp compressed file if needed
-      // Actually VideoCompress handles temp files, but we could call deleteAll
-      // VideoCompress.deleteAllCache();
+      compressionSub.unsubscribe(); // clean up Observable subscription
     }
   }
 
